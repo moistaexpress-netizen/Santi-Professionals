@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Basics Training App</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Icon components
+        const BookOpen = () => <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>;
+        const Award = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>;
+        const CheckCircle = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
+        const Edit2 = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>;
+        const Trash2 = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>;
+        const Plus = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>;
+        const Upload = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>;
+        const Download = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/></svg>;
+        const Play = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
+        const ImageIcon = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
+        const LogOut = ({className}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>;
+        
+        const ComputerTrainingApp = () => {
+          const [currentUser, setCurrentUser] = useState(null);
+          const [users, setUsers] = useState([{ username: 'admin', password: 'admin123', role: 'admin' }]);
+          const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+          const [registerForm, setRegisterForm] = useState({ username: '', password: '', confirmPassword: '' });
+          const [showRegister, setShowRegister] = useState(false);
+          
+          const [activeTab, setActiveTab] = useState('Computer Basics');
+          const [selectedLesson, setSelectedLesson] = useState(null);
+          const [isEditing, setIsEditing] = useState(false);
+          const [showQuizForm, setShowQuizForm] = useState(false);
+          
+          const [lessons, setLessons] = useState({
+            'Computer Basics': [
+              {
+                id: 1,
+                title: 'Introduction to Computers',
+                content: 'A computer is an electronic device that processes data and performs tasks according to instructions. Learn about hardware, software, and basic operations.',
+                imageUrl: '',
+                videoUrl: ''
+              }
+            ],
+            'Windows Shortcuts': [
+              {
+                id: 2,
+                title: 'Essential Windows Shortcuts',
+                content: 'Ctrl+C (Copy), Ctrl+V (Paste), Ctrl+Z (Undo), Alt+Tab (Switch windows), Windows+D (Show desktop)',
+                imageUrl: '',
+                videoUrl: ''
+              }
+            ],
+            'MS Word': [
+              {
+                id: 3,
+                title: 'Getting Started with MS Word',
+                content: 'Microsoft Word is a word processing application. Learn to create, format, and save documents.',
+                imageUrl: '',
+                videoUrl: ''
+              }
+            ],
+            'Excel': [
+              {
+                id: 4,
+                title: 'Introduction to Excel',
+                content: 'Excel is a spreadsheet application for data organization, calculations, and analysis. Learn about cells, rows, columns, and basic formulas.',
+                imageUrl: '',
+                videoUrl: ''
+              }
+            ],
+            'PowerPoint': [
+              {
+                id: 5,
+                title: 'PowerPoint Basics',
+                content: 'Create professional presentations with slides, text, images, and animations. Learn the fundamentals of PowerPoint.',
+                imageUrl: '',
+                videoUrl: ''
+              }
+            ]
+          });
+
+          const [progress, setProgress] = useState({});
+          const [quizzes, setQuizzes] = useState({});
+          const [quizResults, setQuizResults] = useState({});
+          const [currentQuiz, setCurrentQuiz] = useState(null);
+          const [quizAnswers, setQuizAnswers] = useState({});
+
+          const [editForm, setEditForm] = useState({
+            title: '',
+            content: '',
+            imageUrl: '',
+            videoUrl: ''
+          });
+
+          const [quizForm, setQuizForm] = useState({
+            question: '',
+            options: ['', '', '', ''],
+            correctAnswer: 0
+          });
+
+          useEffect(() => {
+            const savedUsers = localStorage.getItem('trainingAppUsers');
+            if (savedUsers) {
+              setUsers(JSON.parse(savedUsers));
+            }
+          }, []);
+
+          useEffect(() => {
+            if (!currentUser) return;
+            
+            const savedLessons = localStorage.getItem(`trainingAppLessons_${currentUser.username}`);
+            const savedProgress = localStorage.getItem(`trainingAppProgress_${currentUser.username}`);
+            const savedQuizzes = localStorage.getItem(`trainingAppQuizzes_${currentUser.username}`);
+            const savedQuizResults = localStorage.getItem(`trainingAppQuizResults_${currentUser.username}`);
+
+            if (savedLessons) setLessons(JSON.parse(savedLessons));
+            if (savedProgress) setProgress(JSON.parse(savedProgress));
+            if (savedQuizzes) setQuizzes(JSON.parse(savedQuizzes));
+            if (savedQuizResults) setQuizResults(JSON.parse(savedQuizResults));
+          }, [currentUser]);
+
+          useEffect(() => {
+            if (currentUser) {
+              localStorage.setItem(`trainingAppLessons_${currentUser.username}`, JSON.stringify(lessons));
+              localStorage.setItem(`trainingAppProgress_${currentUser.username}`, JSON.stringify(progress));
+              localStorage.setItem(`trainingAppQuizzes_${currentUser.username}`, JSON.stringify(quizzes));
+              localStorage.setItem(`trainingAppQuizResults_${currentUser.username}`, JSON.stringify(quizResults));
+            }
+          }, [lessons, progress, quizzes, quizResults, currentUser]);
+
+          const handleLogin = (e) => {
+            e.preventDefault();
+            const user = users.find(u => u.username === loginForm.username && u.password === loginForm.password);
+            if (user) {
+              setCurrentUser(user);
+              setLoginForm({ username: '', password: '' });
+            } else {
+              alert('Invalid credentials!');
+            }
+          };
+
+          const handleRegister = (e) => {
+            e.preventDefault();
+            if (registerForm.password !== registerForm.confirmPassword) {
+              alert('Passwords do not match!');
+              return;
+            }
+            if (users.find(u => u.username === registerForm.username)) {
+              alert('Username already exists!');
+              return;
+            }
+            const newUsers = [...users, { username: registerForm.username, password: registerForm.password, role: 'user' }];
+            setUsers(newUsers);
+            localStorage.setItem('trainingAppUsers', JSON.stringify(newUsers));
+            setRegisterForm({ username: '', password: '', confirmPassword: '' });
+            setShowRegister(false);
+            alert('Registration successful! Please login.');
+          };
+
+          const handleLogout = () => {
+            setCurrentUser(null);
+            setSelectedLesson(null);
+          };
+
+          const addLesson = () => {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            const newLesson = {
+              id: Date.now(),
+              title: 'New Lesson',
+              content: 'Add your content here...',
+              imageUrl: '',
+              videoUrl: ''
+            };
+            setLessons({
+              ...lessons,
+              [activeTab]: [...lessons[activeTab], newLesson]
+            });
+          };
+
+          const deleteLesson = (lessonId) => {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            if (!confirm('Are you sure you want to delete this lesson?')) return;
+            
+            setLessons({
+              ...lessons,
+              [activeTab]: lessons[activeTab].filter(l => l.id !== lessonId)
+            });
+            if (selectedLesson?.id === lessonId) {
+              setSelectedLesson(null);
+            }
+          };
+
+          const startEdit = (lesson) => {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            setEditForm({
+              title: lesson.title,
+              content: lesson.content,
+              imageUrl: lesson.imageUrl || '',
+              videoUrl: lesson.videoUrl || ''
+            });
+            setIsEditing(true);
+          };
+
+          const saveEdit = () => {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            setLessons({
+              ...lessons,
+              [activeTab]: lessons[activeTab].map(l =>
+                l.id === selectedLesson.id ? { ...l, ...editForm } : l
+              )
+            });
+            setSelectedLesson({ ...selectedLesson, ...editForm });
+            setIsEditing(false);
+          };
+
+          const toggleComplete = (lessonId) => {
+            setProgress({
+              ...progress,
+              [lessonId]: !progress[lessonId]
+            });
+          };
+
+          const calculateProgress = (category) => {
+            const categoryLessons = lessons[category];
+            const completed = categoryLessons.filter(l => progress[l.id]).length;
+            return categoryLessons.length > 0 ? (completed / categoryLessons.length) * 100 : 0;
+          };
+
+          const calculateOverallProgress = () => {
+            const allLessons = Object.values(lessons).flat();
+            const completed = allLessons.filter(l => progress[l.id]).length;
+            return allLessons.length > 0 ? (completed / allLessons.length) * 100 : 0;
+          };
+
+          const addQuiz = () => {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            const lessonQuizzes = quizzes[selectedLesson.id] || [];
+            const newQuiz = {
+              id: Date.now(),
+              question: quizForm.question,
+              options: quizForm.options,
+              correctAnswer: quizForm.correctAnswer
+            };
+            setQuizzes({
+              ...quizzes,
+              [selectedLesson.id]: [...lessonQuizzes, newQuiz]
+            });
+            setQuizForm({
+              question: '',
+              options: ['', '', '', ''],
+              correctAnswer: 0
+            });
+            setShowQuizForm(false);
+          };
+
+          const startQuiz = () => {
+            const lessonQuizzes = quizzes[selectedLesson.id] || [];
+            if (lessonQuizzes.length === 0) {
+              alert('No quiz available for this lesson.');
+              return;
+            }
+            setCurrentQuiz(lessonQuizzes);
+            setQuizAnswers({});
+          };
+
+          const submitQuiz = () => {
+            const lessonQuizzes = currentQuiz;
+            let correct = 0;
+            lessonQuizzes.forEach(q => {
+              if (quizAnswers[q.id] === q.correctAnswer) {
+                correct++;
+              }
+            });
+            const score = (correct / lessonQuizzes.length) * 100;
+            const passed = score >= 70;
+            
+            setQuizResults({
+              ...quizResults,
+              [selectedLesson.id]: { score, passed, date: new Date().toLocaleDateString() }
+            });
+            
+            alert(`Quiz completed! Score: ${score.toFixed(0)}% - ${passed ? 'Passed! 🏆' : 'Try again!'}`);
+            setCurrentQuiz(null);
+            setQuizAnswers({});
+          };
+
+          const exportData = () => {
+            const data = {
+              lessons,
+              progress,
+              quizzes,
+              quizResults
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'training-data.json';
+            a.click();
+          };
+
+          const importData = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              try {
+                const data = JSON.parse(event.target.result);
+                if (data.lessons) setLessons(data.lessons);
+                if (data.progress) setProgress(data.progress);
+                if (data.quizzes) setQuizzes(data.quizzes);
+                if (data.quizResults) setQuizResults(data.quizResults);
+                alert('Data imported successfully!');
+              } catch (error) {
+                alert('Error importing data. Please check the file format.');
+              }
+            };
+            reader.readAsText(file);
+          };
+
+          if (!currentUser) {
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+                  <div className="text-center mb-8">
+                    <div className="flex justify-center mb-4">
+                      <BookOpen />
+                    </div>
+                    <h1 className="text-3xl font-bold text-gray-800">Computer Training</h1>
+                    <p className="text-gray-600 mt-2">Master Computer Skills</p>
+                  </div>
+
+                  {!showRegister ? (
+                    <form onSubmit={handleLogin} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input
+                          type="text"
+                          value={loginForm.username}
+                          onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input
+                          type="password"
+                          value={loginForm.password}
+                          onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                      >
+                        Login
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowRegister(true)}
+                        className="w-full text-indigo-600 py-2 hover:underline"
+                      >
+                        Create new account
+                      </button>
+                      <p className="text-xs text-gray-500 text-center mt-4">
+                        Demo: admin / admin123
+                      </p>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleRegister} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input
+                          type="text"
+                          value={registerForm.username}
+                          onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input
+                          type="password"
+                          value={registerForm.password}
+                          onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                        <input
+                          type="password"
+                          value={registerForm.confirmPassword}
+                          onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                      >
+                        Register
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowRegister(false)}
+                        className="w-full text-indigo-600 py-2 hover:underline"
+                      >
+                        Back to Login
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          const overallProgress = calculateOverallProgress();
+          const currentLessons = lessons[activeTab];
+          const currentIndex = selectedLesson ? currentLessons.findIndex(l => l.id === selectedLesson.id) : -1;
+
+          return (
+            <div className="min-h-screen bg-gray-50">
+              <div className="bg-indigo-600 text-white p-6 shadow-lg">
+                <div className="max-w-7xl mx-auto flex justify-between items-center flex-wrap gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold flex items-center gap-3">
+                      <BookOpen />
+                      Computer Training App
+                    </h1>
+                    <p className="text-indigo-200 mt-1">
+                      Welcome, {currentUser.username} {currentUser.role === 'admin' && '(Administrator)'}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {currentUser.role === 'admin' && (
+                      <>
+                        <button
+                          onClick={exportData}
+                          className="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded-lg transition-colors"
+                        >
+                          <Download className="w-4 h-4" />
+                          Export
+                        </button>
+                        <label className="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded-lg cursor-pointer transition-colors">
+                          <Upload className="w-4 h-4" />
+                          Import
+                          <input type="file" accept=".json" onChange={importData} className="hidden" />
+                        </label>
+                      </>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+                <div className="max-w-7xl mx-auto mt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm">Overall Progress</span>
+                    <span className="text-sm font-semibold">{overallProgress.toFixed(0)}%</span>
+                  </div>
+                  <div className="bg-indigo-500 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-yellow-400 h-full transition-all duration-300"
+                      style={{ width: `${overallProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="max-w-7xl mx-auto p-6">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <div className="flex border-b overflow-x-auto">
+                    {Object.keys(lessons).map(tab => {
+                      const tabProgress = calculateProgress(tab);
+                      return (
+                        <button
+                          key={tab}
+                          onClick={() => {
+                            setActiveTab(tab);
+                            setSelectedLesson(null);
+                            setIsEditing(false);
+                          }}
+                          className={`px-6 py-4 font-medium transition-colors whitespace-nowrap ${
+                            activeTab === tab
+                              ? 'bg-indigo-600 text-white'
+                              : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          {tab}
+                          <div className="mt-1 text-xs">
+                            {tabProgress.toFixed(0)}% complete
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6 p-6">
+                    <div className="md:col-span-1 space-y-2">
+                      {currentUser.role === 'admin' && (
+                        <button
+                          onClick={addLesson}
+                          className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors font-medium mb-4"
+                        >
+                          <Plus className="w-5 h-5" />
+                          Add New Lesson
+                        </button>
+                      )}
+                      
+                      {currentLessons.map(lesson => (
+                        <div
+                          key={lesson.id}
+                          onClick={() => {
+                            setSelectedLesson(lesson);
+                            setIsEditing(false);
+                            setCurrentQuiz(null);
+                          }}
+                          className={`p-4 rounded-lg cursor-pointer transition-all ${
+                            selectedLesson?.id === lesson.id
+                              ? 'bg-indigo-50 border-2 border-indigo-500'
+                              : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                                {lesson.title}
+                                {progress[lesson.id] && (
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                )}
+                                {quizResults[lesson.id]?.passed && (
+                                  <Award className="w-4 h-4 text-yellow-500" />
+                                )}
+                              </h3>
+                            </div>
+                            {currentUser.role === 'admin' && (
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedLesson(lesson);
+                                    startEdit(lesson);
+                                  }}
+                                  className="p-1 text-blue-500 hover:bg-blue-50 rounded"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteLesson(lesson.id);
+                                  }}
+                                  className="p-1 text-red-500 hover:bg-red-50 rounded"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="md:col-span-2">
+                      {!selectedLesson ? (
+                        <div className="text-center text-gray-500 py-20">
+                          <div className="flex justify-center mb-4 opacity-50">
+                            <BookOpen />
+                          </div>
+                          <p className="text-lg">Select a lesson to begin</p>
+                        </div>
+                      ) : currentQuiz ? (
+                        <div className="space-y-6">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4">Quiz Time! 📝</h2>
+                          {currentQuiz.map((quiz, idx) => (
+                            <div key={quiz.id} className="bg-gray-50 p-6 rounded-lg">
+                              <h3 className="font-semibold text-lg mb-4">
+                                {idx + 1}. {quiz.question}
+                              </h3>
+                              <div className="space-y-2">
+                                {quiz.options.map((option, optIdx) => (
+                                  <label
+                                    key={optIdx}
+                                    className="flex items-center gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`quiz-${quiz.id}`}
+                                      checked={quizAnswers[quiz.id] === optIdx}
+                                      onChange={() => setQuizAnswers({ ...quizAnswers, [quiz.id]: optIdx })}
+                                      className="w-4 h-4 text-indigo-600"
+                                    />
+                                    <span>{option}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={submitQuiz}
+                              disabled={Object.keys(quizAnswers).length !== currentQuiz.length}
+                              className="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-colors font-medium"
+                            >
+                              Submit Quiz
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCurrentQuiz(null);
+                                setQuizAnswers({});
+                              }}
+                              className="px-6 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : isEditing ? (
+                        <div className="space-y-4">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4">Edit Lesson</h2>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                            <input
+                              type="text"
+                              value={editForm.title}
+                              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                            <textarea
+                              value={editForm.content}
+                              onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                              rows={6}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                              <ImageIcon className="w-4 h-4" />
+                              Image URL
+                            </label>
+                            <input
+                              type="text"
+                              value={editForm.imageUrl}
+                              onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })}
+                              placeholder="https://example.com/image.jpg"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                              <Play className="w-4 h-4" />
+                              Video URL (YouTube Embed)
+                            </label>
+                            <input
+                              type="text"
+                              value={editForm.videoUrl}
+                              onChange={(e) => setEditForm({ ...editForm, videoUrl: e.target.value })}
+                              placeholder="https://www.youtube.com/embed/VIDEO_ID"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={saveEdit}
+                              className="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                            >
+                              Save Changes
+                            </button>
+                            <button
+                              onClick={() => setIsEditing(false)}
+                              className="px-6 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : showQuizForm ? (
+                        <div className="space-y-4">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Quiz Question</h2>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Question</label>
+                            <input
+                              type="text"
+                              value={quizForm.question}
+                              onChange={(e) => setQuizForm({ ...quizForm, question: e.target.value })}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                          {quizForm.options.map((option, idx) => (
+                            <div key={idx}>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Option {idx + 1}
+                              </label>
+                              <input
+                                type="text"
+                                value={option}
+                                onChange={(e) => {
+                                  const newOptions = [...quizForm.options];
+                                  newOptions[idx] = e.target.value;
+                                  setQuizForm({ ...quizForm, options: newOptions });
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          ))}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Correct Answer</label>
+                            <select
+                              value={quizForm.correctAnswer}
+                              onChange={(e) => setQuizForm({ ...quizForm, correctAnswer: parseInt(e.target.value) })}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            >
+                              {quizForm.options.map((_, idx) => (
+                                <option key={idx} value={idx}>Option {idx + 1}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={addQuiz}
+                              disabled={!quizForm.question || quizForm.options.some(o => !o)}
+                              className="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-colors font-medium"
+                            >
+                              Add Question
+                            </button>
+                            <button
+                              onClick={() => setShowQuizForm(false)}
+                              className="px-6 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="flex justify-between items-start">
+                            <h2 className="text-3xl font-bold text-gray-800">{selectedLesson.title}</h2>
+                            {quizResults[selectedLesson.id]?.passed && (
+                              <Award className="w-8 h-8 text-yellow-500" />
+                            )}
+                          </div>
+                          
+                          {selectedLesson.imageUrl && (
+                            <img
+                              src={selectedLesson.imageUrl}
+                              alt={selectedLesson.title}
+                              className="w-full rounded-lg shadow-md"
+                            />
+                          )}
+                          
+                          {selectedLesson.videoUrl && (
+                            <div className="aspect-video">
+                              <iframe
+                                src={selectedLesson.videoUrl}
+                                className="w-full h-full rounded-lg shadow-md"
+                                allowFullScreen
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="prose max-w-none">
+                            <p className="text-gray-700 whitespace-pre-wrap text-lg leading-relaxed">
+                              {selectedLesson.content}
+                            </p>
+                          </div>
+                          
+                          <div className="flex gap-2 pt-4 border-t">
+                            <button
+                              onClick={() => toggleComplete(selectedLesson.id)}
+                              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg transition-colors font-medium ${
+                                progress[selectedLesson.id]
+                                  ? 'bg-green-500 text-white hover:bg-green-600'
+                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                              {progress[selectedLesson.id] ? 'Completed' : 'Mark Complete'}
+                            </button>
+                            
+                            {quizzes[selectedLesson.id]?.length > 0 && (
+                              <button
+                                onClick={startQuiz}
+                                className="flex-1 flex items-center justify-center gap-2 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-medium"
+                              >
+                                📝 Take Quiz
+                                {quizResults[selectedLesson.id] && (
+                                  <span className="text-sm">
+                                    (Score: {quizResults[selectedLesson.id].score.toFixed(0)}%)
+                                  </span>
+                                )}
+                              </button>
+                            )}
+                            
+                            {currentUser.role === 'admin' && (
+                              <button
+                                onClick={() => setShowQuizForm(true)}
+                                className="px-4 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                              >
+                                + Quiz
+                              </button>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              onClick={() => {
+                                const prevIndex = currentIndex - 1;
+                                if (prevIndex >= 0) {
+                                  setSelectedLesson(currentLessons[prevIndex]);
+                                }
+                              }}
+                              disabled={currentIndex === 0}
+                              className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:text-gray-400 transition-colors font-medium"
+                            >
+                              ← Previous
+                            </button>
+                            <button
+                              onClick={() => {
+                                const nextIndex = currentIndex + 1;
+                                if (nextIndex < currentLessons.length) {
+                                  setSelectedLesson(currentLessons[nextIndex]);
+                                }
+                              }}
+                              disabled={currentIndex === currentLessons.length - 1}
+                              className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:text-gray-400 transition-colors font-medium"
+                            >
+                              Next →
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.render(<ComputerTrainingApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
